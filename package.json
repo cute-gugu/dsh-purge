@@ -1,0 +1,148 @@
+{
+  "name": "dsh-purge",
+  "version": "2.0.0",
+  "description": "DSH 指令权威性清洗一体化插件：运行时提示词注入 + 宿主补丁 + 预设 + 演练台。合并自 dsh-purge-community 1.6.55 与 dsh-unrestricted 0.2.4。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": "./client.js",
+    "./redteam": "./lib/redteam/index.js",
+    "./redteam/store": "./lib/redteam/store.js",
+    "./redteam/ui": "./lib/redteam/ui.js",
+    "./redteam/tools": "./lib/redteam/tools.js",
+    "./package.json": "./package.json",
+    "./presets-plugin": "./lib/presets-plugin.js"
+  },
+  "bin": {
+    "dsh-purge": "bin/dsh-purge.js",
+    "purge": "bin/community.js"
+  },
+  "files": [
+    "lib",
+    "!lib/default-prompt-inject.md",
+    "bin",
+    "docs",
+    "presets",
+    "skills",
+    "scripts",
+    "client.js",
+    "cordis.patch.yml",
+    "screenshots.json",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
+    "NOTICE.md",
+    "CONTRIBUTORS.md",
+    "AGENTS.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "embed-prompt": "node scripts/embed-default-prompt.mjs",
+    "diagnose": "node bin/community.js diagnose",
+    "check:docs": "node scripts/check-docs.mjs",
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "check": "node scripts/check-syntax.mjs && node scripts/check-docs.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "license": "MIT",
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "dsh-purge",
+    "prompt-management",
+    "rules",
+    "agent",
+    "backup",
+    "rollback",
+    "compatibility",
+    "破甲",
+    "jailbreak",
+    "prompt-injection",
+    "无限制模式",
+    "unrestricted"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cute-gugu/dsh-purge.git"
+  },
+  "homepage": "https://github.com/cute-gugu/dsh-purge#readme",
+  "bugs": {
+    "url": "https://github.com/cute-gugu/dsh-purge/issues"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
+      ]
+    },
+    "install": {
+      "preferred": "git",
+      "git": "https://github.com/cute-gugu/dsh-purge.git"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dshTarget": "0.2.1-rc.1 (runtime injection + host patches verified)",
+  "author": {
+    "name": "cute-gugu",
+    "url": "https://github.com/cute-gugu"
+  },
+  "contributors": [
+    {
+      "name": "小杨 / YuJunZhiXue (dsh-purge-community)",
+      "url": "https://github.com/kingcharleslzy-ai"
+    },
+    {
+      "name": "yexi-by (dsh-unrestricted)",
+      "url": "https://github.com/yexi-by"
+    },
+    {
+      "name": "luowang-ui",
+      "url": "https://github.com/luowang-ui"
+    },
+    {
+      "name": "heigit",
+      "url": "https://github.com/heigit"
+    },
+    {
+      "name": "OGHong",
+      "url": "https://github.com/OGHong"
+    },
+    {
+      "name": "loLollipop",
+      "url": "https://github.com/loLollipop"
+    },
+    {
+      "name": "youki258",
+      "url": "https://github.com/youki258"
+    },
+    {
+      "name": "SimonQvQ",
+      "url": "https://github.com/SimonQvQ"
+    }
+  ],
+  "dependencies": {
+    "yaml": "2.9.1"
+  }
+}

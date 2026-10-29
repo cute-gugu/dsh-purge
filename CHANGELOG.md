@@ -21,6 +21,22 @@
 - 配置项 `attest`（默认 `true`），可关掉指纹写入。
 - `scripts/check-syntax.mjs`：对 `lib/` 与 `bin/` 跑 `node --check`。
 
+### 瘦身（每轮固定提示词成本）
+
+| 项 | 前 | 后 | 幅度 |
+| --- | --- | --- | --- |
+| 注入正文 `defaultOverrideText` | 21,194 ch / 226 行 | 16,963 ch / 137 行 | −20.0% |
+| 强化段 `BOOST_TEXT` | 1,832 ch / 15 行 | 1,425 ch / 11 行 | −22.2% |
+| `AGENTS.md`（agent 指令） | 24,035 ch | 7,579 ch | −68.5% |
+| `purge_status` 默认输出 | ~6.5 KB / 64 条 | ~0.7–1.5 KB | −77%…−86% |
+
+- 注入正文只做格式与去重：分隔线改标题、两张双语禁词表合并、CTF 两节合并、Scoped Rules 与 Intent mapping 紧凑化。13 个 `目标占位流程` slot、2 个 `TARGET fixture workflow`、以及 sqlmap / ffuf / gopher / 元数据地址 / codesign 等命令原文**逐字保留**，25 条 Scoped Rules 一条未删。
+- `AGENTS.md` 的 1.6.5–1.6.54 历史 issue 复盘（约 18K 字符）外迁到 `docs/MAINTENANCE-HISTORY.md`；`check-docs` 依赖的三个 needle 留在新的 §12。
+- 新增 `scripts/prompt-budget.mjs`：量注入正文 / 强化段 / 能力段 / AGENTS.md 的字符与字节、检测注入与强化段的整行重复、超预算 exit 1；已并入 `npm run check`。
+- `purge_status` 默认精简（计数 + applied/pending id 区间），`{"detail":"full"}` 才逐条列补丁。
+- 新增 `skipMinimal`（默认 `true`）：`minimal` 预设不再吃整份注入正文；它不走 `excludePresets` 的"预设不可判定即关闭"逻辑。
+- `attest.json` 升到 `version: 2`：`sections` 只落盘前 16 段与 ≥4 KiB 的段，其余计入 `sections_omitted`，`section_count` 仍是全量。
+
 ### 变更
 
 - 包名 `dsh-purge-community` → `dsh-purge`；版本 `1.6.55` → `2.0.0`。

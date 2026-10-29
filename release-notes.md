@@ -45,6 +45,10 @@
 - `purge-community` 别名去掉，统一为 `purge`；
 - `dsh.install` 改为 git 来源（本仓库暂无 release 产物）。
 
+## 2.0.0 的瘦身
+
+2.0.0 除了合并，还把「每轮固定提示词成本」压了一轮：注入正文 −20%、强化段 −22%、`AGENTS.md`（会被当 agent 指令读）−68.5%、`purge_status` 默认输出 −77%～86%。规则一条没删——压的是格式、重复与已归档的历史条目。`npm run check` 现在多跑一项 `prompt-budget`，成本涨回预算外会让 CI 直接失败。
+
 ## 升级注意
 
 - 先装 2.0.0，再卸载 `dsh-purge-community` 与 `dsh-unrestricted`；

@@ -38,6 +38,7 @@
       config:
         enabled: true
         excludePresets: []
+        skipMinimal: true
         autoApplyOnStart: false
         autoUpdateOnStart: false
         autoRevertOnMissing: false

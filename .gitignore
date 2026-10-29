@@ -8,3 +8,6 @@ Thumbs.db
 # 本地验收/诊断产物
 _smoke/
 *.tgz
+
+# 明文正文本地备份（不发布、不入库）
+lib/default-prompt-inject.orig.md

@@ -5,7 +5,7 @@
 | 贡献者 | 贡献 |
 | --- | --- |
 | [小杨 / YuJunZhiXue](https://github.com/YuJunZhiXue) | 原始 dsh-purge 项目作者；保留原 Git 历史、MIT 许可证和署名。 |
-| [kingcharleslzy-ai](https://github.com/kingcharleslzy-ai) | Purge Community 分支维护、发行与集成。 |
+| [kingcharleslzy-ai](https://github.com/kingcharleslzy-ai) | 上游 dsh-purge 分支维护、发行与集成。 |
 | [luowang-ui](https://github.com/luowang-ui) | [PR #1](https://github.com/kingcharleslzy-ai/dsh-purge/pull/1)：修复桌面 CLI 修复流程误用异步复制的问题，改为同步原子复制。 |
 | [heigit](https://github.com/heigit) | [issue #3](https://github.com/kingcharleslzy-ai/dsh-purge/issues/3)：提供 Web/Headless 备份与更新问题的复现、源码分析、环境变量 workaround 及验证反馈，补充当前实例自检要求；对应修复见 [PR #4](https://github.com/kingcharleslzy-ai/dsh-purge/pull/4)。 |
 | [OGHong](https://github.com/OGHong) | [issue #5](https://github.com/kingcharleslzy-ai/dsh-purge/issues/5)：定位 Electron ASAR 文件系统导致的自检双向误判，提供最小修复与运行证据；[#12](https://github.com/kingcharleslzy-ai/dsh-purge/issues/12) 命令冲突与 [#15](https://github.com/kingcharleslzy-ai/dsh-purge/issues/15) 权限自检误报的复现、分析与纠正。 |

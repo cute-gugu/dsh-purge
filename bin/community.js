@@ -217,10 +217,10 @@ if (LEGACY[op]) {
       ? await patchDrift(target, undefined, {surface:hostSurface(target),dshHome:home})
       : {host:"",state:"unknown",checked:0,drifted:[],optionalDrift:[],chained:[],missing:[],
           note:"未定位当前实例；请明确 DSH_BASE 或 PURGE_DSH_CLI，不扫描其他安装"};
-    result = { name: "Purge Community", package: PACKAGE, compatibility: compatibility(target), ...drift };
+    result = { name: "Purge", package: PACKAGE, compatibility: compatibility(target), ...drift };
   } else if (op === "status")
     result = {
-      name: "Purge Community",
+      name: "Purge",
       package: PACKAGE,
       compatibility: compatibility(aiBase),
       backups: (() => { try { return maintenance().list(); } catch { return []; } })(),

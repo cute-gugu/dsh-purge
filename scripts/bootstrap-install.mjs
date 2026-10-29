@@ -306,7 +306,7 @@ export async function bootstrapInstall(options = {}) {
   if (!/^\d+\.\d+\.\d+$/.test(version)) throw Error("Invalid release version");
   const filename = `dsh-purge-community-${version}.tgz`;
   const base = `https://github.com/${repo}/releases/download/v${version}`;
-  log(`${local ? "Verifying local" : "Downloading"} Purge Community ${version}...`);
+  log(`${local ? "Verifying local" : "Downloading"} dsh-purge ${version}...`);
   if (local && fs.statSync(options.archiveFile).size > 50 * 1024 * 1024) throw Error("Release file too large");
   const archive = local ? fs.readFileSync(options.archiveFile) : await downloadReleaseFile(`${base}/${filename}`, 50 * 1024 * 1024, { ...download, request, log, stage: "archive", budget: archiveDownloadBudget() });
   const sums = local ? `${options.sha256}  ${filename}\n` : (await downloadReleaseFile(`${base}/SHA256SUMS.txt`, 64 * 1024, { ...download, request, log, stage: "checksum" })).toString("utf8");

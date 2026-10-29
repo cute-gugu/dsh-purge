@@ -159,6 +159,17 @@ sh "$PURGE_INSTALL_DIR/install.sh" --dry-run
 
 完整的实例选择、回滚与失败恢复步骤见 [安装指南](docs/INSTALLATION.md)，Agent 必须先读 [AGENTS.md §12](AGENTS.md#installation)。
 
+### 方式四：离线一键导入包（对方机器没有 Node）
+
+对方机器没有 Node / npm、也不想敲命令时，用离线控制台包（由 `node tools/local-import/build.mjs` 生成，产物在仓库同级 `_dist` 下）：
+
+1. 解压到任意目录（建议路径不含空格）；
+2. 双击 `dsh-purge.bat` → 选 `[1] 一键安装/修复`；
+3. 完全退出 DSH，再重新打开。
+
+控制台把插件复制到 `<profile>
+ode_modulesdsh-purge`，并在该 profile 的 `package.json` 里写入 `"dsh-purge": "file:<路径>"` 与 bundle 登记，写前备份 `package.json.bak-*`。同一菜单里还有 `[2] 状态自检`（退出码 `0` 正常 / `1` 可修 / `2` 没装）和 `[3] 卸载`（卸载把这份登记与复制品一起清掉，还原成未安装状态）。它只动当前 profile 的 `package.json` 与 `node_modules`，不改宿主目录、不改全局 npm 源、不自动重启；宿主补丁仍要在面板里点「应用」。
+
 ## 面板
 
 左侧栏一整页，不做悬浮按钮：

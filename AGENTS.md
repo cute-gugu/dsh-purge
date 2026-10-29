@@ -167,3 +167,13 @@ purge probe new
 ## 13. 历史维护记录
 
 `§11` 之后原有的 1.6.5–1.6.54 逐版 issue 复盘（约 18K 字符）已移到 [docs/MAINTENANCE-HISTORY.md](docs/MAINTENANCE-HISTORY.md)。要查具体版本的诊断结论、命令冲突、换包相位、注入排序 A/B 数据时去那里；本文件只保留当前有效规则。
+
+## 14. 本地一键导入包（无 Node 的机器）
+
+`tools/local-import/` 产出离线控制台：解压后双击 `dsh-purge.bat`（菜单：安装/自检/卸载/路径，也支持 `install|check|uninstall|paths` 直通），配套三个 `.ps1` 与 `payload\`。
+
+- 依赖写 `"dsh-purge": "file:<母本路径/正斜杠>"`（**别用 `link:`**，要建符号链接）：母本 `%LOCALAPPDATA%\dsh-purge\<version>` → 整树复制到 `<profile>\node_modules\dsh-purge`；bundles 文本级重建保原格式，写前校验并备份。
+- payload 只带 `node_modules/yaml`；`@deepseek-ai/*` 是宿主 peer，别带。
+- 编码：`.ps1`/`.txt` = UTF-8+BOM+CRLF，`.bat` = **GBK(936)**+CRLF，否则 cmd 乱码；`build.mjs` 有往返校验。
+- 自检退出码契约：`0` 正常 / `1` 可修 / `2` 没装，不要改。
+- 构建 `node tools/local-import/build.mjs`。

@@ -135,6 +135,35 @@ if ($installedHere) {
     if (Test-Path -LiteralPath (Join-Path $targetDir 'node_modules\yaml\package.json')) { Ok '依赖 yaml 在位' }
     else { Bad '缺 node_modules\yaml（宿主可能加载失败，需修复）' }
 
+    # 包名一致性：客户端 bundle 的注册 id 必须等于包名，否则宿主按 entry id 取不到模块
+    # （2026-10-29 事故：改名后 client.js 仍注册旧 id → web boot 未激活 + import failed）
+    $instName = [string]$inst.name
+    $clientFile = Join-Path $targetDir 'client.js'
+    if (Test-Path -LiteralPath $clientFile) {
+        $clientText = [System.IO.File]::ReadAllText($clientFile, [System.Text.Encoding]::UTF8)
+        $mr = [regex]::Match($clientText, '__ModuleLoader__\.load\(\s*\{\s*id\s*:\s*["'']([^"'']+)["'']')
+        if (-not $mr.Success) { Bad 'client.js 里找不到 __ModuleLoader__.load({id:...})，无法校验注册 id' }
+        elseif ($mr.Groups[1].Value -ne $instName) {
+            Bad "client.js 注册 id 是「$($mr.Groups[1].Value)」，与包名「$instName」不一致 —— 宿主会 import failed，进恢复模式"
+        }
+        else { Ok "包名与客户端注册 id 一致：$instName" }
+    }
+
+    # 预设 / bundle 补丁里的 name 行若指向旧包，宿主校验 peer 依赖时会 ENOENT 并禁用该行
+    $staleNames = @()
+    foreach ($yml in @('presets\redteam\agent.cordis.yml', 'cordis.patch.yml')) {
+        $ymlPath = Join-Path $targetDir $yml
+        if (-not (Test-Path -LiteralPath $ymlPath)) { continue }
+        foreach ($line in [System.IO.File]::ReadAllLines($ymlPath, [System.Text.Encoding]::UTF8)) {
+            $ml = [regex]::Match($line, '^\s*name\s*:\s*[''"]?([^\s''"]+)[''"]?\s*$')
+            if (-not $ml.Success) { continue }
+            $head = $ml.Groups[1].Value.Split('/')[0]
+            if (@('dsh-purge-community', 'dsh-purge-panel') -contains $head) { $staleNames += "$yml → $($ml.Groups[1].Value)" }
+        }
+    }
+    if ($staleNames.Count -gt 0) { Bad "还有指向旧包的行：$($staleNames -join '；') —— 宿主会禁用这些行" }
+    else { Ok '没有指向旧包的 name 行' }
+
     # 与母本比对 package.json 是否同一版本内容
     $masterDir = $null
     if ($env:LOCALAPPDATA) { $masterDir = Join-Path $env:LOCALAPPDATA "dsh-purge\$($inst.version)" }

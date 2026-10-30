@@ -339,6 +339,19 @@ if (-not (Test-Path -LiteralPath (Join-Path $targetDir 'node_modules\yaml'))) {
     Write-Warn2 'payload 里没看到 yaml 依赖，宿主可能加载失败；确认解压完整'
 }
 
+# 包名一致性：客户端注册 id 必须等于包名，否则宿主 import failed 并进恢复模式
+$instName = [string]$installed.name
+$clientFile = Join-Path $targetDir 'client.js'
+if (-not (Test-Path -LiteralPath $clientFile)) {
+    Fail '装完却找不到 client.js'
+}
+$mr = [regex]::Match([System.IO.File]::ReadAllText($clientFile, [System.Text.Encoding]::UTF8), '__ModuleLoader__\.load\(\s*\{\s*id\s*:\s*["'']([^"'']+)["'']')
+if (-not $mr.Success) { Write-Warn2 'client.js 里没找到模块注册 id，跳过包名一致性校验' }
+elseif ($mr.Groups[1].Value -ne $instName) {
+    Fail "client.js 注册 id「$($mr.Groups[1].Value)」与包名「$instName」不一致，宿主会 import failed —— 这个包是坏的，请换一份完整解压包"
+}
+else { Write-Ok "包名与客户端注册 id 一致：$instName" }
+
 Write-Host ''
 Write-Host '  装好了。接下来：' -ForegroundColor White
 Write-Host '    1) 完全退出 DSH —— 关掉窗口，托盘图标也要右键退出，确保进程没了' -ForegroundColor White

@@ -100,6 +100,13 @@ A: 九成是没完全退出 DSH。任务管理器里搜 DSH，全结束掉再开
 Q: 提示 profiles 目录不存在？
 A: 先把 DSH 打开一次，让它初始化，再回来双击。
 
+Q: 装完打开 DSH 进了恢复模式，提示「dsh-purge: import failed」或
+   「web boot: 1 entry did not activate」？
+A: 这份解压包里的插件本体是坏的 —— 客户端 bundle 注册的模块名和包名不一致
+   （多见于只覆盖了部分文件、或自己改过包名）。重新完整解压一份再装一次。
+   装完在控制台选 [2] 状态自检，看到「包名与客户端注册 id 一致」才算好；
+   仍报 [问题] 就把那几行截图。不要手工改 payload 里的文件。
+
 Q: 我这台机器上还装着旧的 dsh-purge-community 或 dsh-unrestricted？
 A: 脚本默认会把它们从登记表里去掉并删除对应目录（避免两个抢同一条
    system-prompt）。不想动它们，加参数 -RemoveLegacy:$false 再跑一次。

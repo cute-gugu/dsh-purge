@@ -46,6 +46,18 @@ function copyTree(from, to, rel = "") {
   }
 }
 
+// fs.cpSync 在本机 Windows 上复制 node_modules 时会以 0xC0000409 fail-fast 崩溃，
+// 这里用逐文件的递归复制替代（与 copyTree 同一条路径，已验证稳定）。
+function copyDirPlain(from, to) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const ent of fs.readdirSync(from, { withFileTypes: true })) {
+    const src = path.join(from, ent.name);
+    const dst = path.join(to, ent.name);
+    if (ent.isDirectory()) copyDirPlain(src, dst);
+    else if (ent.isFile()) fs.copyFileSync(src, dst);
+  }
+}
+
 function writeUtf8Bom(target, text) {
   const crlf = text.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n");
   fs.writeFileSync(target, Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(crlf, "utf8")]));
@@ -103,12 +115,68 @@ if (!fs.existsSync(yamlSrc)) {
   process.exit(1);
 }
 fs.mkdirSync(path.join(PAYLOAD, "node_modules"), { recursive: true });
-fs.cpSync(yamlSrc, path.join(PAYLOAD, "node_modules", "yaml"), { recursive: true });
+copyDirPlain(yamlSrc, path.join(PAYLOAD, "node_modules", "yaml"));
 for (const junk of ["package-lock.json", ".package-lock.json"]) {
   const p = path.join(PAYLOAD, "node_modules", junk);
   if (fs.existsSync(p)) fs.rmSync(p, { force: true });
 }
 log("  携带 node_modules/yaml");
+
+// ---------------------------------------------------------------- 1.5 一致性门禁
+// 2026-10-29 事故：2.0.0 从 dsh-purge-community 改名后，client.js 仍把自己注册成旧 id，
+// 宿主按 entry id 取不到客户端模块 → web boot: 1 entry did not activate + import failed → 恢复模式。
+// 这里把"包名 == 客户端注册 id == 各处 name 前缀"钉死，打包阶段就拦住同类问题。
+const LEGACY_NAMES = ["dsh-purge-community", "dsh-purge-panel"];
+const gate = [];
+
+function readUtf8(p) { return fs.readFileSync(p, "utf8"); }
+
+const clientFile = path.join(PAYLOAD, "client.js");
+if (!fs.existsSync(clientFile)) {
+  gate.push("payload 缺 client.js");
+} else {
+  const src = readUtf8(clientFile);
+  const m = src.match(/__ModuleLoader__\.load\(\s*\{\s*id\s*:\s*["']([^"']+)["']/);
+  if (!m) {
+    gate.push("client.js 里找不到 __ModuleLoader__.load({id:...})，无法校验注册 id");
+  } else if (m[1] !== pkg.name) {
+    gate.push(`client.js 注册 id 是 "${m[1]}"，与包名 "${pkg.name}" 不一致 —— 宿主会 import failed 并进恢复模式`);
+  }
+  for (const legacy of LEGACY_NAMES) {
+    if (src.includes(`"${legacy}"`) || src.includes(`'${legacy}'`)) {
+      gate.push(`client.js 里还有旧名 "${legacy}"（面板命名空间 / 注册 id 未改净）`);
+    }
+  }
+}
+
+// bundle 补丁与预设里的 name 行若指向旧包子路径，宿主校验 peer 依赖时会 ENOENT 并禁用该行
+const ymlFiles = [];
+(function walkYml(dir) {
+  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    const f = path.join(dir, ent.name);
+    if (ent.isDirectory()) { if (ent.name !== "node_modules") walkYml(f); }
+    else if (/\.ya?ml$/i.test(ent.name)) ymlFiles.push(f);
+  }
+})(PAYLOAD);
+
+for (const f of ymlFiles) {
+  readUtf8(f).split(/\r?\n/).forEach((line, i) => {
+    const m = line.match(/^\s*name\s*:\s*['"]?([^\s'"]+)['"]?\s*$/);
+    if (!m) return;
+    const head = m[1].split("/")[0];
+    if (LEGACY_NAMES.includes(head)) {
+      gate.push(`${path.relative(PAYLOAD, f)}:${i + 1} 的 name 仍指向旧包 "${m[1]}" —— 宿主会 ENOENT 并禁用该行`);
+    }
+  });
+}
+
+if (gate.length) {
+  console.error("\n打包中止：产物一致性门禁未通过");
+  for (const g of gate) console.error(`  ✗ ${g}`);
+  console.error(`\n包名 = ${pkg.name}；改完重跑 node tools/local-import/build.mjs`);
+  process.exit(1);
+}
+log(`  一致性门禁通过（包名 ${pkg.name} = client 注册 id，yml 无旧包引用）`);
 
 // ---------------------------------------------------------------- 2. 脚本
 writeUtf8Bom(path.join(DIST, "install-dsh-purge.ps1"), fs.readFileSync(path.join(HERE, "install-dsh-purge.ps1"), "utf8"));
@@ -123,7 +191,7 @@ writeUtf8Bom(path.join(DIST, "README-先看我.txt"), fs.readFileSync(path.join(
 const s = sizeOf(DIST);
 log(`\n${NAME} v${VERSION}: ${s.files} 文件, ${(s.total / 1048576).toFixed(2)} MB`);
 fs.writeFileSync(path.join(OUT, "build-info.txt"),
-  `name=${NAME}\nversion=${VERSION}\nfiles=${s.files}\nbytes=${s.total}\nbuilt=${new Date().toISOString()}\n`);
+  `name=${NAME}\nversion=${VERSION}\npackage=${pkg.name}\nclient-id=${pkg.name}\ngate=ok\nfiles=${s.files}\nbytes=${s.total}\nbuilt=${new Date().toISOString()}\n`);
 
 const zipPath = path.join(OUT, `${NAME}-${VERSION}.zip`);
 if (fs.existsSync(zipPath)) fs.rmSync(zipPath, { force: true });

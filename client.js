@@ -1,6 +1,6 @@
 // Generated from src/ by npm run build. Do not edit.
 // Derived UI: YuJunZhiXue/dsh-purge (MIT), see LICENSE.
-window.__ModuleLoader__.load({id:"dsh-purge-community",factory:(require)=>{
+window.__ModuleLoader__.load({id:"dsh-purge",factory:(require)=>{
 var module={exports:{}};var exports=module.exports;
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -14427,7 +14427,7 @@ function EnvAdaptSendGate() {
 }
 
 // src/entry.js
-var name = true ? "dsh-purge-community" : "dsh-purge-panel";
+var name = "dsh-purge";
 var inject = ["slots", "locale"];
 function PurgeIcon({ size = 20 } = {}) {
   return h(
@@ -14517,7 +14517,7 @@ function apply(ctx) {
     () => ctx.slots.register(
       {
         name: "plugins.bundle.config",
-        key: true ? "dsh-purge-community" : "dsh-purge-panel",
+        key: "dsh-purge",
         inject: () => ({ t })
       },
       SettingsRoot

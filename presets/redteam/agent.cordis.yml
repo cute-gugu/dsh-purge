@@ -125,7 +125,7 @@
     instructionHint: true
 
 - id: redteam-tools
-  name: dsh-purge-community/redteam/tools
+  name: dsh-purge/redteam/tools
 
 - id: agent-instructions
   name: '@deepseek-ai/dsh-agent-instructions'
